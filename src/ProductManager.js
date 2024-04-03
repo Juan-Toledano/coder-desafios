@@ -1,4 +1,4 @@
-import { json } from "express";
+
 import fs from "fs"
 class ProductManager{
     #products
@@ -6,7 +6,7 @@ class ProductManager{
     static id_products = 0;
     constructor(){
         this.#products = this.#lecturaProductos();
-        this.#path = "./data/productos.json" 
+        this.#path = "./src/data/productos.json" 
     }
 
     #asignarId(){
@@ -37,9 +37,9 @@ class ProductManager{
         }
     }
 
-    addProduct(title, description, price, thumbnail, code, stock){
-        if(!title || !description || !price || !thumbnail || !code || !stock)
-            console.log("se necesitan que esten completos los siguientes parametros: title, description, price, thumbnail, code, stock");
+    addProduct(title, description, price, thumbnail, code, stock , category , status = true){
+        if(!title || !description || !price || !code || !stock || !category || !status)
+            console.log("se necesitan que esten completos los siguientes parametros: title, description, price, code, stock, category y status");
                        
         const code2 = this.#products.find(p=> p.code == code);
 
@@ -56,12 +56,18 @@ class ProductManager{
                 price:price,
                 thumbnail:thumbnail,
                 code:code,
-                stock:stock
+                stock:stock,
+                category:category,
+                status:status
             };
             this.#products.push(Producto_nuevo);
             this.#guardarArchivo();
 
-            return "producto nuevo agreado"
+            let result = {
+                msg:"producto añadido correctamente",
+                producto:Producto_nuevo
+            }
+            return result 
     }
 
     getProducts(limit = 0){
@@ -72,36 +78,53 @@ class ProductManager{
         return this.#products;
     }
     getProductById(id){
-       const product = this.#products.find(p => p.id == id);
+        let estado = false
+        let respuesta = `no existe ningun producto con el siguiente id: ${id}` 
+        
+        const product = this.#products.find(p => p.id == id);
         if(product){
-            return "found"
+            estado = true 
+            respuesta = product
         }
-        else{
-            return "not found"
-        }
+        return {estado, respuesta}
     }
     updateProduct(id , objetoUpdate){
-        let msg = `el producto con el id ${id} no existe`
+        let result = `el producto con el id ${id} no existe`
 
         const index = this.#products.findIndex(p=> p.id === id)
 
         if(index !== -1){
             const {id, ...rest} = objetoUpdate
+            const permitidos = [title, description, price, thumbnail, code, stock , category]
+            const actualizados = Object.keys(rest)
+                .filter(propiedad => permitidos.includes(propiedad))
+                .reduce((obj, key) =>{
+                    obj[key] = rest[key]
+                    return obj
+                }, {})
             this.#products[index] = {...this.#products[index] , ...rest};
             this.#guardarArchivo();
-            msg = "el producto fue actualizado"
+            result = {
+                msg: "el producto fue actualizado",
+                producto:this.#products[index]
+            }
         }
+        return result
     }
     deleteProduct(id){
-        let msg = `el producto con id ${id} no existe`
+        let result = `el producto con id ${id} no existe`
 
         const index = this.#products.findIndex(p => p.id === id);
         if(index !== -1){
             this.#products = this.#products.filter(p=> p.id !== id);
             this.#guardarArchivo();
-            msg = "el producto fue eliminado"
+            result ={
+                msg:"el producto fue eliminado",
+                resultado:this.#products[index]
+  
+            } 
         }
-        return msg;
+        return result;
     }
 }
 export default ProductManager;
