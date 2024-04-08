@@ -8,7 +8,7 @@ class CartsManager{
     static id_products = 0;
     constructor(){
         this.#carts = this.#lecturaCarritos();
-        this.#path = "./src/data/carritos.json" 
+        this.#path = "./data/carritos.json" 
     }
 
     #asignarIdCarritos(){
@@ -21,7 +21,7 @@ class CartsManager{
 
     #lecturaCarritos(){
         try {
-            if(fs.existsSync(this.path))
+            if(fs.existsSync(this.#path))
                 return JSON.parse(fs.readFileSync(this.#path , {encoding: "utf-8"}));
             
             return []
@@ -49,6 +49,10 @@ class CartsManager{
         this.#guardarArchivo();
 
         return nuevoC
+    }
+
+    getCarts(){
+        return this.#carts
     }
 
     getProductById(id){

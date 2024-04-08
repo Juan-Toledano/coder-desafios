@@ -11,9 +11,6 @@ router.get("/" , (req,res)=>{
     const prod = new ProductManager();
     prod.addProduct("peugeot" , "308" , 900000 , "foto" , "xxx" , 30);
     prod.addProduct("chevrolet" , "meriva" , 5000 , "foto" , "xxxx" , 70)
-    prod.addProduct("chevrolet" , "meriva" , 5000 , "foto" , "xxxxx" , 70);
-    
-    
     res.json({productos: prod.getProducts(limit)})
 
 })

@@ -1,1 +1,1 @@
-[{"id":1,"title":"peugeot","description":"308","price":900000,"thumbnail":"foto","code":"xxx","stock":30}]
+[{"id":1,"title":"peugeot","description":"308","price":900000,"thumbnail":"foto","code":"xxx","stock":30,"status":true},{"id":2,"title":"chevrolet","description":"meriva","price":5000,"thumbnail":"foto","code":"xxxx","stock":70,"status":true}]

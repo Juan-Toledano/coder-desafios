@@ -6,7 +6,7 @@ class ProductManager{
     static id_products = 0;
     constructor(){
         this.#products = this.#lecturaProductos();
-        this.#path = "./src/data/productos.json" 
+        this.#path = "./data/productos.json" 
     }
 
     #asignarId(){
