@@ -16,6 +16,7 @@ router.get("/", (req, res) =>{
     c.crearCarrito()
     c.crearCarrito()
     c.crearCarrito()
+    c.crearCarrito();
     return res.json({carritos: c.getCarts()})
 })
 router.post("/" , (req, res) =>{
