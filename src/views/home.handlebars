@@ -1,0 +1,42 @@
+<h2>Home Page</h2>
+<hr>
+
+<h3>Lista de productos:</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>id</th>
+            <th>title</th>
+            <th>description</th>
+            <th>precio</th>
+            <th>code</th>
+            <th>stock</th>
+            <th>category</th>
+            <th>status</th>
+            <th>image</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each products}}
+        <tr>
+            <td>{{this.id}}</td>
+            <td>{{this.title}}</td>
+            <td>{{this.description}}</td>
+            <td>{{this.price}}</td>
+            <td>{{this.code}}</td>
+            <td>{{this.stock}}</td>
+            <td>{{this.category}}</td>
+            <td>{{this.statatus}}</td>
+            <td>{{this.thumbnails}}</td>
+            <td>
+                {{#if this.status}}
+                <a href="{{this.thumbnails.[0]}}" target="_blank">{{this.thumbnails.[0]}}</a>
+                {{else}}
+                sin imagen 
+                {{/if}}
+            </td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>

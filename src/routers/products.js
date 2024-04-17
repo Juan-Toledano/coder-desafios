@@ -25,9 +25,11 @@ router.get("/:pid" , (req, res) => {
 router.post("/" , (req ,res)=>{
     const {title , description , code , price, thumbnails , stock, category, status} = req.body
     const prod = new ProductManager();
-    prod.addProduct("peugeot" , "308" , 900000 , "foto" , "xxx" , 30)
-    prod.addProduct("chevrolet" , "meriva" , 5000 , "foto" , "xxxx" , 70)
     
+    prod.addProduct("samsung" , "a03" , 100000 ,  "xxx" , "30" , "celulares" , true);
+    prod.addProduct("iphone" , "14" , 900000  ,  "xxxx" , "10" , "celulares" , true);
+    prod.addProduct("motorola" , "e22" , 50000  ,  "xxxxx" , "15" , "celulares" , true);
+
     const resultado = prod.addProduct(title , description , code , price, thumbnails , stock, category, status);
 
     return res.json({resultado});
