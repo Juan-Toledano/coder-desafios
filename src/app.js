@@ -6,6 +6,9 @@ import { engine } from "express-handlebars";
 import views from "./routers/views.js"
 import __dirname from "./utils.js"
 import ProductManager from "./ProductManager.js";
+import { dbConnect } from "./db/config.js";
+import { productmodelo } from "./models/productsMod.js";
+import { messagesmodelo } from "./models/messagesMod.js";
 
 const app = express();
 
@@ -14,44 +17,48 @@ const PORT = 3000
 const p = new ProductManager()
 
 app.use(express.json())
-app.use(express.urlencoded({extended:true}))
+app.use(express.urlencoded({ extended: true }))
 app.use(express.static(__dirname + "/public"))
 
 
-app.engine("handlebars" , engine())
-app.set("views" , __dirname + "/views")
-app.set("view engine" , "handlebars")
+app.engine("handlebars", engine())
+app.set("views", __dirname + "/views")
+app.set("view engine", "handlebars")
 
 
+app.use("/", views)
+app.use("/api/products", products);
+app.use("/api/carts", carts);
 
-//app.get("/" , (req , res) =>{    
-//    
-//    return res.render("home")
-//})
+await dbConnect();
 
-app.use("/" , views)
-app.use("/api/products" , products);
-app.use("/api/carts" , carts);
-
-
-const serverHTTP= app.listen(PORT, ()=>console.log(`Server online en puerto ${PORT}`))
+const serverHTTP = app.listen(PORT, () => console.log(`Server online en puerto ${PORT}`))
 const serverSocket = new Server(serverHTTP)
 
-serverSocket.on("connection" , socket =>{
-    //console.log("cliente conectado desde el front-end");
-    
-    p.addProduct("samsung" , "a03" , 100000 ,  "xxx" , "30" , "celulares" , true);
-    p.addProduct("iphone" , "14" , 900000  ,  "xxxx" , "10" , "celulares" , true);
-    p.addProduct("motorola" , "e22" , 50000  ,  "xxxxx" , "15" , "celulares" , true);
+serverSocket.on("connection", async (socket) => {
 
-    const products = p.getProducts()
-    socket.emit("productos" , products)
+    //productos
+    const productos = await productmodelo.find()
+    socket.emit("productos", products)
 
-    socket.on("agregarProducto" , producto=>{
-        console.log({producto});
-        const result = p.addProduct({...producto})
-        console.log({result});
-        if(result.producto)
-        socket.emit("productos" , result.producto)
+    socket.on("agregarProducto", async producto => {
+        const newProduct = await productmodelo.create({ ...producto })
+        if (newProduct) {
+            productos.push(newProduct)
+            socket.emit("productos", productos)
+        }
     })
+    //chat
+    const messages = await messagesmodelo.find()
+    socket.emit("message", messages)
+
+    socket.on("message", async (data) => {
+        const newMessage = await messagesmodelo.create({ ...data })
+        if (newMessage) {
+            const messages = await messagesmodelo.find()
+            serverSocket.emit("messageLogs", messages)
+        }
+    })
+
+    socket.broadcast.emit("nuevo_user")
 })

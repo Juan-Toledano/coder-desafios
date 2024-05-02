@@ -1,1 +1,35 @@
-[{"id":1,"title":"samsung","description":"a03","price":100000,"thumbnail":"xxx","code":"30","stock":"celulares","category":true,"status":true},{"id":2,"title":"iphone","description":"14","price":900000,"thumbnail":"xxxx","code":"10","stock":"celulares","category":true,"status":true},{"id":3,"title":"motorola","description":"e22","price":50000,"thumbnail":"xxxxx","code":"15","stock":"celulares","category":true,"status":true}]
+[
+    {
+        "id": 1,
+        "title": "samsung",
+        "description": "a03",
+        "price": 100000,
+        "thumbnail": "xxx",
+        "code": "30",
+        "stock": "celulares",
+        "category": true,
+        "status": true
+    },
+    {
+        "id": 2,
+        "title": "iphone",
+        "description": "14",
+        "price": 900000,
+        "thumbnail": "xxxx",
+        "code": "10",
+        "stock": "celulares",
+        "category": true,
+        "status": true
+    },
+    {
+        "id": 3,
+        "title": "motorola",
+        "description": "e22",
+        "price": 50000,
+        "thumbnail": "xxxxx",
+        "code": "15",
+        "stock": "celulares",
+        "category": true,
+        "status": true
+    }
+]

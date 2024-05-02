@@ -1,15 +1,15 @@
 const socket = io();
 
-socket.on('productos' , products =>{
+socket.on('productos' , productos =>{
     const tbody = document.getElementById("productos-body")
     tbody.innerHTML = ""
 
-    products.forEach(producto => {
+    productos.forEach(producto => {
         const row = tbody.insertRow();
 
 
         row.innerHTML= `
-        <td>${producto.id}</td>
+        <td>${producto._id}</td>
         <td>${producto.title}</td>
         <td>${producto.description}</td>
         <td>${producto.price}</td>
@@ -22,6 +22,7 @@ socket.on('productos' , products =>{
         `;
     });
 })
+
 const formulario = document.getElementById("product-form" , function (event){
     event.preventDefault();
 
