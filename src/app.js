@@ -7,8 +7,8 @@ import views from "./routers/views.js"
 import __dirname from "./utils.js"
 import ProductManager from "./ProductManager.js";
 import { dbConnect } from "./db/config.js";
-import { productmodelo } from "./models/productsMod.js";
 import { messagesmodelo } from "./models/messagesMod.js";
+import { getProductsService } from "./services/products.services.js";
 
 const app = express();
 
@@ -38,11 +38,13 @@ const serverSocket = new Server(serverHTTP)
 serverSocket.on("connection", async (socket) => {
 
     //productos
-    const productos = await productmodelo.find()
-    socket.emit("productos", products)
+    const {payload} = await getProductsService({})
+    const productos = payload
+    socket.emit("productos", payload)
 
-    socket.on("agregarProducto", async producto => {
-        const newProduct = await productmodelo.create({ ...producto })
+    socket.on("agregarProducto", async (producto) => {
+        //const newProduct = await productmodelo.create({ ...producto })
+        const newProduct = await addProductService({...producto})
         if (newProduct) {
             productos.push(newProduct)
             socket.emit("productos", productos)
