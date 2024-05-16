@@ -9,6 +9,9 @@ import ProductManager from "./ProductManager.js";
 import { dbConnect } from "./db/config.js";
 import { messagesmodelo } from "./models/messagesMod.js";
 import { getProductsService } from "./services/products.services.js";
+import session from "express-session";
+import { router as sessionsRouter } from "./routers/session.js";
+import MongoStore from "connect-mongo"
 
 const app = express();
 
@@ -19,13 +22,23 @@ const p = new ProductManager()
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static(__dirname + "/public"))
+app.use(session({
+    secret: "CoderCoder123",
+    resave: true,
+    saveUninitialized: true,
+    store: MongoStore.create({
+        ttl:3600,
+        mongoUrl:"mongodb+srv://juancruztoledano:juan1606@cluster0.mptb6ey.mongodb.net/ecommerce"
+    }),
+    
+}))
 
 
 app.engine("handlebars", engine())
 app.set("views", __dirname + "/views")
 app.set("view engine", "handlebars")
 
-
+app.use("/api/sessions", sessionsRouter)
 app.use("/", views)
 app.use("/api/products", products);
 app.use("/api/carts", carts);
@@ -38,13 +51,13 @@ const serverSocket = new Server(serverHTTP)
 serverSocket.on("connection", async (socket) => {
 
     //productos
-    const {payload} = await getProductsService({})
+    const { payload } = await getProductsService({})
     const productos = payload
     socket.emit("productos", payload)
 
     socket.on("agregarProducto", async (producto) => {
         //const newProduct = await productmodelo.create({ ...producto })
-        const newProduct = await addProductService({...producto})
+        const newProduct = await addProductService({ ...producto })
         if (newProduct) {
             productos.push(newProduct)
             socket.emit("productos", productos)

@@ -72,14 +72,6 @@
 
     <script>
         function addToCart(productId) {
-        const idCart = "663a513c906f62d10efe8c28"
-        fetch(`/api/carts/${idCart}/product/${productId}`,{
-            method: "POST",
-            headers:{
-                "Content-Type": "application/json",
-            },
-        })
-
         .then(resp =>resp.json())
         .then(data => {
             console.log(data)
@@ -90,3 +82,7 @@
         }
     </script>
 </div>
+
+<a href="/cart/{{carrito._id}}">Ver carrito</a>
+
+{{>menu}}
