@@ -72,15 +72,7 @@ router.post("/login", async (req, res) => {
         }
     }
 
-    // otras validaciones
-    // preguntar por adminCoder@coder.com, y la contraseña adminCod3r123
-    // si son esos datos, devolves al usuario nombre "admin", email 
-    // adminCoder@coder.com y rol "admin"
-
-    if(email === "adminCoder@coder.com" && password === Cod3r123){
-        
-    }
-
+    
     let usuario = await usuariosManager.getBy({ email, password: generaHash(password) })
     if (!usuario) {
         if (web) {
