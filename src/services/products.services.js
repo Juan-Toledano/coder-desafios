@@ -1,7 +1,7 @@
 import { productmodelo } from "../models/productsMod.js"
 
 
-export const getProductsService = async ({ limit = 2, page = 1, sort, query }) => {
+export const getProductsService = async ({ limit = 10, page = 1, sort, query }) => {
 
     try {
         page = page == 0 ? 1 : page

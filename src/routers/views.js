@@ -5,13 +5,13 @@ import { auth } from "../middleware/auth.js";
 
 const router = Router();
 
-//router.get("/", async (req, res) => {
-//    const { payload } = await getProductsService({})
-//    return res.render("home", { productos: payload, styles: "styles.css", title: "Home Page" })
-//})
+router.get("/", async (req, res) => {
+    const { payload } = await getProductsService({})
+    return res.render("home", { productos: payload, styles: "styles.css", title: "Home Page" })
+})
 
 
-router.get("/realtimeproducts", (req, res) => {
+router.get("/realtimeproducts", auth, (req, res) => {
     return res.render("realTimeProducts", { title: "realTimeProducts" })
 })
 
@@ -44,7 +44,7 @@ router.get('/', (req, res) => {
 router.get('/registro', (req, res) => {
     let { error } = req.query
 
-    res.status(200).render('registro' , {error})
+    res.status(200).render('registro', { error })
 })
 
 router.get('/login', (req, res) => {

@@ -8,6 +8,7 @@ export const usuariosModelo=mongoose.model('usuarios',new mongoose.Schema({
     password: String,
     rol:{
         type: String, 
+        enum:["user" , "admin"],
         default:"user"
     },
     carrito:{
