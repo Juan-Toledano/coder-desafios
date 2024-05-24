@@ -5,19 +5,19 @@ import { Server } from "socket.io";
 import { engine } from "express-handlebars";
 import views from "./routers/views.js"
 import __dirname from "./utils.js"
-import ProductManager from "./ProductManager.js";
 import { dbConnect } from "./db/config.js";
 import { messagesmodelo } from "./models/messagesMod.js";
 import { getProductsService } from "./services/products.services.js";
 import session from "express-session";
 import { router as sessionsRouter } from "./routers/session.js";
 import MongoStore from "connect-mongo"
+import { initPassport } from "./config/passport.config.js";
+import passport from "passport";
 
 const app = express();
 
 const PORT = 3000
 
-const p = new ProductManager()
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -32,6 +32,9 @@ app.use(session({
     }),
     
 }))
+initPassport()
+app.use(passport.initialize())
+app.use(passport.session())
 
 
 app.engine("handlebars", engine())

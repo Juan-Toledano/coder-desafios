@@ -11,4 +11,7 @@ export class UsuariosManagerMongo{
         return await usuariosModelo.findOne(filtro).lean()
     }
 
+    async getByPopulate(filtro={}){
+        return await usuariosModelo.findOne(filtro).populate("carrito").lean()
+    }
 }
