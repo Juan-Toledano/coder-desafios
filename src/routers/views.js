@@ -33,7 +33,7 @@ router.get("/cart/:cid", async (req, res) => {
     const { cid } = req.params
     console.log("id del carrito: ", cid);
     const carrito = await getCartByIdService(cid)
-    return res.render("cart", { title: "carrito", carrito })
+    return res.render("cart", { carrito })
 })
 
 router.get('/', (req, res) => {
@@ -57,8 +57,8 @@ router.get('/login', (req, res) => {
 router.get('/perfil', auth, (req, res) => {
 
     res.status(200).render('perfil', {
-        usuario: req.session.usuario, 
-        login:req.session.usuario
+        usuario: req.session.usuario,
+        login: req.session.usuario
     })
 })
 
