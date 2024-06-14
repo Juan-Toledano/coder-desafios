@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { generaHash } from '../utils.js';
-import { UsuariosManagerMongo as UsuariosManager } from '../usuariosManager.js';
-//import CartsManager from '../cartManager.js';
+import { UserManagerMongoDAO as UsuariosManager } from '../DAO/UserManagerMongoDAO.js';
 import { createCartService } from '../services/carts.services.js';
 import passport from 'passport';
 

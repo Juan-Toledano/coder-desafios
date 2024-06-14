@@ -1,7 +1,7 @@
 import passport from "passport";
 import local from "passport-local"
 import github from "passport-github2"
-import { UsuariosManagerMongo as UsuariosManager } from "../usuariosManager.js";
+import { UserManagerMongoDAO as UsuariosManager } from "../DAO/UserManagerMongoDAO.js";
 import { CartManager } from "../cartManager.js";
 import { generaHash } from "../utils.js";
 
