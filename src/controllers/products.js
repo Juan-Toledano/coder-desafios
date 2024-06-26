@@ -1,72 +1,137 @@
-import { request, response } from "express"
-import { addProductService, deleteProductService, getProductByIdService, getProductsService, updateProductService } from "../services/products.services.js"
+import { io } from "../app.js";
+import { isValidObjectId } from "mongoose";
+import { productService } from "../services/products.services.js";
 
-export const getProducts = async (req = request, res = response) => {
+export class ProductController {
+  static getProducts = async (req, res) => {
     try {
-        const result = await getProductsService({ ...req.query })
-        return res.json({ result });
+      let { limit, sort, page, ...filters } = req.query;
+      let products = await productService.getProductsPaginate(
+        limit,
+        page,
+        sort,
+        filters
+      );
+      res.json(products);
     } catch (error) {
-        console.log(`error en el getProducts ${error}`);
-        return res.status(500).json({ msg: "hablar con un administrador" })
+      res.status(400).json({ error: `${error.message}` });
     }
-}
+  };
 
-export const getProductById = async (req = request, res = response) => {
+  static getProductById = async (req, res) => {
+    let { pid } = req.params;
+    if (!isValidObjectId(pid)) {
+      return res.status(400).json({
+        error: `Ingrese un id valido de MongoDB`,
+      });
+    }
     try {
-        const pid = req.params
-        const producto = await getProductByIdService(pid)
-        if (!producto) {
-            return res.status(404).json({ msg: `no existe producto con el id ${pid}` })
+      let product = await productService.getProductsBy({ _id: pid });
+      if (product) {
+        res.json({ product });
+      } else {
+        return res.json({ error: `Product not found` });
+      }
+    } catch (error) {
+      res.status(400).json({ error: `Product ${pid} not found` });
+    }
+  };
+
+  static addProduct = async (req, res) => {
+    let {
+      title,
+      description,
+      code,
+      price,
+      status,
+      stock,
+      category,
+      thumbnails,
+    } = req.body;
+    if (!title || !description || !code || !price || !stock || !category)
+      return res.json({ error: "Check unfilled fields" });
+
+    let exist;
+    try {
+      exist = await productService.getProductsBy({ code });
+    } catch (error) {
+      return res.status(500).json({
+        error: `${error.message}`,
+      });
+    }
+
+    if (exist) {
+      return res
+        .status(400)
+        .json({ error: `Product with code ${code} is already registered` });
+    }
+
+    try {
+      await productService.addProduct({ ...req.body });
+      let productList = await productManager.getPaginate();
+      io.emit("updateProducts", productList);
+      return res.json({ payload: `Product added` });
+    } catch (error) {
+      res.status(300).json({ error: "Error when the product was created" });
+    }
+  };
+
+  static updateProduct = async (req, res) => {
+    let { pid } = req.params;
+    if (!isValidObjectId(pid)) {
+      return res.status(400).json({
+        error: `Enter a valid MongoDB id`,
+      });
+    }
+
+    let toUpdate = req.body;
+
+    if (toUpdate._id) {
+      delete toUpdate._id;
+    }
+
+    if (toUpdate.code) {
+      let exist;
+      try {
+        exist = await productService.getProductsBy({ code: toUpdate.code });
+        if (exist) {
+          return res.status(400).json({
+            error: `There is already another product with the code ${toUpdate.code}`,
+          });
         }
-        return res.json({ producto })
-    } catch (error) {
-        console.log(`error en el getProducts ${error}`);
-        return res.status(500).json({ msg: "hablar con un administrador" })
+      } catch (error) {
+        return res.status(500).json({
+          error: `${error.message}`,
+        });
+      }
     }
-}
 
-export const addProduct = async (req = request, res = response) => {
     try {
-        const { title, description, code, price, thumbnails, stock, category, status } = req.body
-
-        if (!title, !description, !code, !price, !stock, !category, !status) {
-            return res.status(404).json({ msg: `los campos title , description , code , price, thumbnails , stock, category, status son obligatorios` })
-        }
-
-        const producto = await addProductService({ ...req.body })
-        return res.json({ producto })
-
+      const products = await productService.updateProduct(pid, toUpdate);
+      return res.json(products);
     } catch (error) {
-        console.log(`error en el addProducts ${error}`);
-        return res.status(500).json({ msg: "hablar con un administrador" })
+      res.status(300).json({ error: "Error when modifying the product" });
     }
-}
+  };
 
-export const deleteProduct = async (req = request, res = response) => {
+  static deleteProduct = async (req, res) => {
+    let { pid } = req.params;
+    if (!isValidObjectId(pid)) {
+      return res.status(400).json({
+        error: `Enter a valid MongoDB id`,
+      });
+    }
     try {
-        const { pid } = req.params
-        const result = await deleteProductService(pid)
-
-        if (result)
-            return res.json({ msg: "producto eliminado", result })
-        return res.status(404).json({ msg: `no se pudo eliminar el producto con el id ${pid}` })
+      let products = await productService.deleteProduct(pid);
+      if (products.deletedCount > 0) {
+        let productList = await productService.getProductsPaginate();
+        io.emit("deleteProducts", productList);
+        return res.json({ payload: `Product ${pid} deleted` });
+      } else {
+        return res.status(404).json({ error: `Product ${id} doesnt exist` });
+      }
     } catch (error) {
-        console.log(`error en el deleteProduct ${error}`);
-        return res.status(500).json({ msg: "hablar con un administrador" })
+      res.status(300).json({ error: `Error deleting product ${pid}` });
     }
-
-}
-
-export const updateProduct = async (req = request, res = response) => {
-    try {
-        const { pid } = req.params
-        const { _id, ...rest } = req.body
-        const producto = await updateProductService(pid, rest)
-        if (producto)
-            return res.json({ msg: "producto acualizado", producto })
-        return res.status(404).json({ msg: `no se pudo actualizar el producto con id ${pid}` })
-    } catch (error) {
-        console.log(`error en el updateProduct ${error}`);
-        return res.status(500).json({ msg: "hablar con un administrador" })
-    }
+  };
 }

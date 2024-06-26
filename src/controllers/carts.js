@@ -1,95 +1,174 @@
-import { request, response } from "express";
-import { addProd_to_CartService, createCartService, deleteCartService, deleteProdinCartService, getCartByIdService, updateProdinCartService } from "../services/carts.services.js";
+import { cartService } from "../services/carts.services.js";
+import { isValidObjectId } from "mongoose";
+import { ticketService } from "../services/ticketService.js";
 
-
-export const getCartById = async (req = request, res = response) => {
+export class CartController {
+  static getAllCarts = async (req, res) => {
     try {
-        const { cid } = req.params
-        //const carrito = await cartmodelo.findById(cid)
-        const carrito = await getCartByIdService(cid)
-        if (carrito) {
-            return res.json({ carrito })
-        } else {
-            return res.status(404).json({ msg: `el carrito con id ${cid} no existe` })
-        }
-
+      let getAllCarts = await cartService.getAllCarts();
+      return res.json({ getAllCarts });
     } catch (error) {
-        console.log("error en el getcartbyid", error);
-        return res.status(500).json({ msg: "hablar con un admininstrador" })
+      res.status(500).json({ error: `error getting carts: ${error.message}` });
     }
-}
+  };
 
-export const createCart = async (req = request, res = response) => {
+  static createCart = async (req, res) => {
     try {
-        const carrito = await createCartService()
-        return res.json({ msg: `carrito creado`, carrito })
+      await cartService.createCart();
+      return res.json({
+        payload: `Cart created!`,
+      });
     } catch (error) {
-        console.log("error en el createCart", error);
-        return res.status(500).json({ msg: "hablar con un admininstrador" })
+      res.status(500).json({ error: "error creating cart" });
     }
-}
+  };
 
-export const addProd_to_Cart = async (req = request, res = response) => {
+  static getCartById = async (req, res) => {
+    let { cid } = req.params;
+    if (!isValidObjectId(cid)) {
+      return res.status(400).json({
+        error: `Enter a valid MongoDB id`,
+      });
+    }
+
     try {
-        const { cid, pid } = req.params
-        const carrito = await addProd_to_CartService(cid, pid)
-
-        if (!carrito) {
-            return res.status(404).json({ msg: `el carrito con id ${cid} no existe` })
-        }
-        return res.json({ msg: `carrito actualizado`, carrito })
+      let cartById = await cartService.getCartById(cid);
+      if (!cartById) {
+        return res.status(300).json({ error: "Cart not found" });
+      } else {
+        res.json({ cartById });
+      }
     } catch (error) {
-        console.log("error en el addProd_to_Cart", error);
-        return res.status(500).json({ msg: "hablar con un admininstrador" })
+      res
+        .status(500)
+        .json({ error: `error getting cart ${cid}, ${error.message}` });
     }
-}
+  };
 
-export const deleteProdinCart = async (req = request, res = response) => {
+  static addProductToCart = async (req, res) => {
+    let { cid, pid } = req.params;
+
+    if (!isValidObjectId(cid, pid)) {
+      return res.status(400).json({
+        error: `Enter a valid MongoDB id`,
+      });
+    }
+
+    if (!cid || !pid) {
+      return res.status(300).json({ error: "Check unfilled fields" });
+    }
+
     try {
-        const { cid, pid } = req.params
-        const carrito = await deleteProdinCartService(cid, pid)
-        if (!carrito)
-            return res.status(404).json({ msg: "no se pudo realizar la operacion" })
-        return res.json({ msg: `producto eliminado del carrito ${carrito}` })
+      await cartService.addProductToCart(cid, pid);
+      let cartUpdated = await cartService.getCartById(cid);
+      res.json({ payload: cartUpdated });
     } catch (error) {
-        console.log("error en el deleteProdinCart", error);
-        return res.status(500).json({ msg: "hablar con un admininstrador" })
+      res
+        .status(500)
+        .json({ error: `error when adding product ${pid} to cart ${cid}` });
     }
-}
+  };
 
-export const updateProdinCart = async (req = request, res = response) => {
+  static deleteProductInCart = async (req, res) => {
+    let { cid, pid } = req.params;
+    if (!isValidObjectId(cid)) {
+      return res.status(400).json({
+        error: `Enter a valid MongoDB id`,
+      });
+    }
+
+    if (!cid || !pid) {
+      return res.status(300).json({ error: "Check unfilled fields" });
+    }
+
     try {
-        const { cid, pid } = req.params
-        const { quantity } = req.body
-
-        if (!quantity || !Number.isInteger(quantity))
-            return res.status(404).json({ msg: "el quantity es obligatorio y debe ser un numero entero" })
-
-        const carrito = await updateProdinCartService(cid, pid, quantity)
-
-
-        if (!carrito)
-            return res.status(404).json({ msg: "no se pudo realizar la operacion" })
-        return res.json({ msg: "producto actualizado del carrito", carrito })
+      await cartService.deleteProductInCart(cid, pid);
+      return res.json({ payload: `Product ${pid} deleted from cart ${cid}` });
     } catch (error) {
-        console.log("error en el updateProdinCart", error);
-        return res.status(500).json({ msg: "hablar con un admininstrador" })
+      return res.status(500).json({ error: `${error.message}` });
     }
-}
+  };
 
-export const deleteCart = async (req = request, res = response) => {
+  static updateProductInCart = async (req, res) => {
+    let { cid, pid } = req.params;
+    let { quantity } = req.body;
+    if (!isValidObjectId(cid)) {
+      return res.status(400).json({
+        error: `Enter a valid MongoDB id`,
+      });
+    }
+
+    if (!cid || !pid) {
+      return res.status(300).json({ error: "Check unfilled fields" });
+    }
+
     try {
-        const { cid } = req.params
-
-
-        const carrito = await deleteCartService(cid)
-
-
-        if (!carrito)
-            return res.status(404).json({ msg: "no se pudo realizar la operacion" })
-        return res.json({ msg: "producto actualizado del carrito", carrito })
+      await cartService.updateProductInCart(cid, pid, quantity);
+      res.json({ payload: `Product ${pid} updated` });
     } catch (error) {
-        console.log("error en el updateProdinCart", error);
-        return res.status(500).json({ msg: "hablar con un admininstrador" })
+      return res.status(500).json({ error: `${error.message}` });
     }
+  };
+
+  static deleteAllProductsInCart = async (req, res) => {
+    let { cid } = req.params;
+    if (!isValidObjectId(cid)) {
+      return res.status(400).json({
+        error: `Enter a valid MongoDB id`,
+      });
+    }
+
+    if (!cid) {
+      return res.status(300).json({ error: "Check unfilled fields" });
+    }
+
+    try {
+      await cartService.deleteAllProductsInCart(cid);
+      res.json({ payload: `Products deleted from cart ${cid}` });
+    } catch (error) {
+      return res.status(500).json({ error: `${error.message}` });
+    }
+  };
+
+  static updateAllCart = async (req, res) => {
+    let { cid } = req.params;
+    let toUpdate = req.body;
+    if (!isValidObjectId(cid)) {
+      return res.status(400).json({
+        error: `Enter a valid MongoDB id`,
+      });
+    }
+
+    if (!cid) {
+      return res.status(400).json({ error: "Cart ID is missing" });
+    }
+
+    if (!toUpdate.product || !toUpdate.quantity) {
+      return res.status(400).json({ error: "Invalid Cart" });
+    }
+
+    try {
+      await cartService.updateAllCart(cid, toUpdate);
+      res.json({ payload: `Cart ${cid} updated` });
+    } catch (error) {
+      return res.status(500).json({ error: `${error.message}` });
+    }
+  };
+
+  static createTicket = async (req, res) => {
+    let { cid } = req.params;
+    let purchaser = req.session.user.email;
+    if (!isValidObjectId(cid)) {
+      return res.status(400).json({
+        error: `Enter a valid MongoDB id`,
+      });
+    }
+
+    try {
+      let ticket = await ticketService.generateTicket(cid, purchaser);
+      res.json({ ticket });
+    } catch (error) {
+      return res.status(500).json({ error: `${error.message}` });
+    }
+  };
 }

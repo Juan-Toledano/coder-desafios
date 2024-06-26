@@ -1,66 +1,76 @@
-import { Router } from "express"
-import { getProductsService } from "../services/products.services.js";
-import { getCartByIdService } from "../services/carts.services.js";
+import { Router } from "express";
 import { auth } from "../middleware/auth.js";
-
-const router = Router();
-
-router.get("/", async (req, res) => {
-    const { payload } = await getProductsService({})
-    return res.render("home", { productos: payload, styles: "styles.css", title: "Home Page" })
-})
+import { cartService } from "../services/carts.services.js";
+import { productService } from "../services/products.services.js";
+import UserViewDto from "../dao/DTO/UserDTO.js";
 
 
-router.get("/realtimeproducts", auth, (req, res) => {
-    return res.render("realTimeProducts", { title: "realTimeProducts" })
-})
+export const router = Router();
 
 
-router.get("/chat", (req, res) => {
-    return res.render("chat", { title: "Chat" })
-})
+router.get("/", auth(["admin", "user"]), (req, res) => {
+  res.redirect("/products");
+});
+router.get("/products", auth(["admin", "user"]), async (req, res) => {
+  let { limit = 10, sort, page = 1, ...filters } = req.query;
+  let user = req.session.user;
+  let cart = { _id: req.session.user.cart };
+  let {
+    payload: products,
+    totalPages,
+    prevPage,
+    nextPage,
+    hasPrevPage,
+    hasNextPage,
+    prevLink,
+    nextLink,
+  } = await productService.getProductsPaginate(limit, page, sort, filters);
+  res.status(200).render("home", {
+    products,
+    totalPages,
+    prevPage,
+    nextPage,
+    page,
+    hasPrevPage,
+    hasNextPage,
+    prevLink,
+    nextLink,
+    user,
+    cart,
+  });
+});
 
-router.get("/products", auth, async (req, res) => {
+router.get("/realTimeProducts", auth(["admin", "user"]), async (req, res) => {
+  let products = await productService.getAllProducts();
+  let user = new UserViewDto(req.session.user)
+  let cart = { _id: req.session.user.cart };
+  res.status(200).render("realTimeProducts", { products, user, cart });
+});
 
-    let carrito = {
-        _id: req.session.usuario.carrito
-    }
-    const result = await getProductsService({ ...req.query })
-    return res.render('products', { title: "productos", result })
-})
+router.get("/chat", auth(["user"]), (req, res) => {
+  res.status(200).render("chat");
+});
 
-router.get("/cart/:cid", async (req, res) => {
-    const { cid } = req.params
-    console.log("id del carrito: ", cid);
-    const carrito = await getCartByIdService(cid)
-    return res.render("cart", { carrito })
-})
+router.get("/carts/:cid", auth(["admin", "user"]), async (req, res) => {
+  let user = req.session.user;
+  let cid = req.params.cid;
+  let cart = { _id: req.session.user.cart };
+  let userCart = await cartService.getCartById(cid);
+  userCart = userCart.products.map((c) => c.toJSON());
 
-router.get('/', (req, res) => {
+  res.status(200).render("carts", { cart, user, userCart });
+});
 
-    res.status(200).render('home')
-})
+router.get("/register", auth(["public"]), (req, res) => {
+  res.render("register");
+});
+router.get("/login", auth(["public"]), (req, res) => {
+  let error = req.query;
+  res.render("login", { error });
+});
 
-router.get('/registro', (req, res) => {
-    let { error } = req.query
-
-    res.status(200).render('registro', { error })
-})
-
-router.get('/login', (req, res) => {
-
-    let { error } = req.query
-
-    res.status(200).render('login', { error })
-})
-
-router.get('/perfil', auth, (req, res) => {
-
-    res.status(200).render('perfil', {
-        usuario: req.session.usuario,
-        login: req.session.usuario
-    })
-})
-
-
-export default router
+router.get("/profile", auth(["admin", "user"]), (req, res) => {
+  let user = new UserViewDTO(req.session.user);
+  let cart = { _id: req.session.user.cart };
+  res.render("profile", { user, cart });
+});

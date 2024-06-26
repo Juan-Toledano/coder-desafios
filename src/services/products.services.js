@@ -1,92 +1,52 @@
-import { productmodelo } from "../models/productsMod.js"
+import { productDAO } from "../DAO/factory.js";
 
 
-export const getProductsService = async ({ limit = 10, page = 1, sort, query }) => {
+class ProductService {
+  constructor(dao) {
+    this.dao = new dao();
+  }
 
-    try {
-        page = page == 0 ? 1 : page
-        page = Number(page)
-        limit = Number(limit)
-        const skip = (page - 1) * limit
-        const sortOrderOptions = { 'asc': -1, 'desc': 1 }
-        sort = sortOrderOptions[sort] || null
+  async getProductsPaginate(limit = 10, page = 1, price, query) {
+    return await this.dao.getPaginate(limit, page, price, query);
+  }
 
-        try {
-            if (query) {
-                query = JSON.parse(decodeURIComponent(query))
-            }
-        } catch (error) {
-            console.log(`error al parsear`, error);
-            query = {}
-        }
+  async getAllProducts() {
+    return await this.dao.getAll();
+  }
 
-        const queryProdcuts = productmodelo.find(query).limit(limit).skip(skip).lean();
-        if (sort !== null) {
-            queryProdcuts.sort({ price: sort })
-        }
+  async getProductsBy(filter) {
+    return await this.dao.getBy(filter);
+  }
 
-        const [productos, totalDocs] = await Promise.all([queryProdcuts, productmodelo.countDocuments(query)])
+  async addProduct({
+    title,
+    description,
+    code,
+    price,
+    status = true,
+    stock,
+    category,
+    thumbnails = [],
+  }) {
+    return await this.dao.create({
+      title,
+      description,
+      code,
+      price,
+      status,
+      stock,
+      category,
+      thumbnails,
+    });
+  }
 
-        const totalPages = Math.ceil(totalDocs / limit)
-        const hasNextPage = page < totalPages
-        const hasPrevPage = page > 1
-        const prevPage = hasPrevPage ? page - 1 : null
-        const nextPage = hasNextPage ? page + 1 : null
+  async updateProduct(id, productData) {
+    return await this.dao.update({ id, productData });
+  }
 
-        return {
-            //status: "succes/error",
-            totalDocs,
-            totalPages,
-            limit,
-            query: JSON.stringify(query),
-            page,
-            hasNextPage,
-            hasPrevPage,
-            prevPage,
-            nextPage,
-            payload: productos
-        }
-
-    } catch (error) {
-        console.log(`error en el getProducts ${error}`);
-        throw error
-    }
+  async deleteProduct(productId) {
+    return this.dao.delete(productId);
+  }
 }
 
-export const getProductByIdService = async (pid) => {
-    try {
-        return await productmodelo.findById(pid)
-    } catch (error) {
-        console.log(`error en el getProductsByIdService ${error}`);
-        throw error
-    }
-}
-
-export const addProductService = async ({ title, description, code, price, thumbnails, stock, category, status }) => {
-    try {
-        return await productmodelo.create({ title, description, code, price, thumbnails, stock, category, status })
-    } catch (error) {
-        console.log(`error en el addProductsServices ${error}`);
-        throw error
-    }
-}
-
-export const deleteProductService = async (pid) => {
-    try {
-        return await productmodelo.findByIdAndDelete(pid)
-    } catch (error) {
-        console.log(`error en el deleteProductServices ${error}`);
-        throw error
-    }
-
-}
-
-export const updateProductService = async (pid, rest) => {
-    try {
-        return await productmodelo.findByIdAndUpdate(pid, { ...rest }, { new: true })
-
-    } catch (error) {
-        console.log(`error en el updateProductService ${error}`);
-        throw error
-    }
-}
+export const productService = new ProductService(productDAO);

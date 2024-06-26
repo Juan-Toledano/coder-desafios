@@ -1,6 +1,7 @@
-import { productmodelo } from "../models/productsMod";
+import { productmodelo } from "../models/productsMod.js";
 
-export default class ProductManagerMongoDAO {
+
+export class ProductManagerMongoDAO {
   async create({
     title,
     description,

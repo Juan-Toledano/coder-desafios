@@ -1,8 +1,23 @@
-export const auth=(req, res, next)=>{
-    if(!req.session.usuario){
-        res.setHeader('Content-Type','application/json');
-        return res.status(401).json({error:`No existen usuarios autenticados`})
+export const auth = (privileges = []) => {
+  return (req, res, next) => {
+    privileges = privileges.map((p) => p.toLowerCase());
+
+    if (privileges.includes("public")) {
+      return next();
     }
 
-    next()
-}
+    if (!req.session.user?.role) {
+      return res
+        .status(401)
+        .json({ error: `Please login, or problem with the role` });
+    }
+
+    if (!privileges.includes(req.session.user.role.toLowerCase())) {
+      return res
+        .status(403)
+        .json({ error: `Insufficient privileges to access` });
+    }
+
+    return next();
+  };
+};

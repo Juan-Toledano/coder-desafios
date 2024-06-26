@@ -1,9 +1,10 @@
 
 import { cartmodelo } from "../models/cartsMod.js";
-import ProductManagerMongoDAO from "./ProductManagerMongoDAO.js";
+import { ProductManagerMongoDAO } from "./ProductoManagerMongoDao.js";
+
 const productManager = new ProductManagerMongoDAO();
 
-export default class CartManagerMongoDAO {
+export class CartManagerMongoDAO {
   async create() {
     return await cartmodelo.create({ products: [] });
   }

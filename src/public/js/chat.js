@@ -1,67 +1,63 @@
-const socket = io()
-
-let user;
-let chatBox = document.getElementById("chatBox")
-let log = document.getElementById("messageLogs")
-
-let data
-
-socket.on("message", msg => {
-    data = msg
-})
-
-socket.on("messageLogs", msgs => {
-    renderizar(msgs)
-})
-
-const renderizar = (msgs) => {
-    let messages = ""
-
-    msgs.forEach(message => {
-        const isCurrentUser = message.user === user
-        const messageClass = isCurrentUser ? "my-message" : "other-message"
-        messages = messages + `<div class ="${messageClass}">${message.user}: ${message.message}</div>`
-    });
-    log.innerHTML = messages
-    chatBox.scrollIntoView(false)
-}
-
 Swal.fire({
-    title: "identifícate",
-    input: "email",
-    text: "ingresa tu correo para identificarte",
+    title: "Ingrese su nombre",
+    input: "text",
     inputValidator: (value) => {
-        if (!value) {
-            return "necesitas ingresar un correo para continuar"
-        }
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-        if (!emailRegex.test(value)) {
-            return "ingrese un correo electronico valido"
-        }
-        return null
-    }
-}).then(result => {
-    if (result.isConfirmed) {
-        user = result.value
-        renderizar(data)
-    }
-})
-
-chatBox.addEventListener("keyup", evt => {
-    if (evt.key === "Enter") {
-        if (chatBox.value.trim().length > 0) {
-            const message = chatBox.value
-            socket.emit("message", { user, message })
-            chatBox.value = ""
-        }
-    }
-})
-
-socket.on("nuevo_user", () => {
-    Swal.fire({
-        text: "nuevo usuario conectado",
-        toast: true,
-        position: "top-right"
-    })
-})
+      return !value && "Debe ingresar un nombre";
+    },
+    allowOutsideClick: false,
+  }).then((datos) => {
+    const socket = io();
+    let name = datos.value;
+    document.title = "Chat de " + name;
+    socket.emit("newConnection", `Se conecto: ${name}`);
+  
+    let inputMessage = document.getElementById("message");
+    let divMessage = document.getElementById("messages");
+    inputMessage.focus();
+  
+    socket.emit("id", name);
+    socket.on("newUser", (name) => {
+      Toastify({
+        text: `${name} conectado`,
+        style: {
+          background: "linear-gradient(to right, #00b09b, #96c93d)",
+        },
+        duration: 3000,
+      }).showToast();
+    });
+  
+    inputMessage.addEventListener("keyup", (e) => {
+      e.preventDefault();
+      if (e.code === "Enter" && e.target.value.trim().length > 0) {
+        socket.emit("newMessage", name, e.target.value.trim());
+        e.target.value = "";
+        e.target.focus();
+      }
+    });
+  
+    socket.on("sendMessage", (userName, message) => {
+      let className = userName === name ? "me" : "others";
+      divMessage.innerHTML += `
+      <div class="msg">
+        <div class="${className}">
+        <strong>${userName}</strong>
+        <p>${message}</p>
+        </div>
+      </div>
+      `;
+      divMessage.scrollTop = divMessage.scrollHeight;
+    });
+  
+    socket.on("previousMessages", (messages) => {
+      messages.forEach((messagesList) => {
+        let className = messagesList.user === name ? "me" : "others";
+        divMessage.innerHTML += `
+        <div class="msg ${className}">
+          <strong>${messagesList.user}</strong>
+          <p>${messagesList.message}</p>
+        </div>
+        `;
+        divMessage.scrollTop = divMessage.scrollHeight;
+      });
+    });
+  });

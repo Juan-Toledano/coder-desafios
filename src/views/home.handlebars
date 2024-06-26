@@ -1,44 +1,40 @@
-<h2>Home Page</h2>
-<hr>
-
-<h3>Lista de productos:</h3>
-
-<table>
-    <thead>
-        <tr>
-            <th>id</th>
-            <th>title</th>
-            <th>description</th>
-            <th>precio</th>
-            <th>code</th>
-            <th>stock</th>
-            <th>category</th>
-            <th>status</th>
-            <th>image</th>
-        </tr>
-    </thead>
-    <tbody>
-        {{#each products}}
-        <tr>
-            <td>{{this._id}}</td>
-            <td>{{this.title}}</td>
-            <td>{{this.description}}</td>
-            <td>{{this.price}}</td>
-            <td>{{this.code}}</td>
-            <td>{{this.stock}}</td>
-            <td>{{this.category}}</td>
-            <td>{{this.status}}</td>
-            <td>{{this.thumbnails}}</td>
-            <td>
-                {{#if this.status}}
-                <a href="{{this.thumbnails.[0]}}" target="_blank">{{this.thumbnails.[0]}}</a>
-                {{else}}
-                sin imagen 
-                {{/if}}
-            </td>
-        </tr>
-        {{/each}}
-    </tbody>
-</table>
-<br><br>
-{{>menu}}
+{{>navbar}}
+<main class="mainProducts">
+  <article id="products">
+<input type="text" value="{{user.cart}}" id="cart" hidden>
+    {{#each products}}
+      <div class="card cardEcommerce" style="width: 370px;height: 600px">
+        <img
+          src=""
+          class="card-img-top style="
+          height="300rem"
+          alt={{description}}
+        />
+        <div class="card-body">
+          <p class="card-title fw-bold fs-5">{{title}}</p>
+          <p class="card-text"><small class="text-body-secondary">
+              {{description}}
+            </small></p>
+          <p class="card-text precio fw-bold">${{price}}</p>
+          <button id=`btnAdd-{{code}}` class="btn btn-success" onclick="addToCart('{{_id}}')">Add</button>
+        </div>
+      </div>
+    {{/each}}
+    
+  </article>
+<div class="pagination">
+    {{#if hasPrevPage}}
+        <a href={{prevLink}}><button>Ant</button></a>
+        {{else}}
+        <button disabled class="disabled">Ant</button>
+    {{/if}}
+        <p>Pagina: <strong>{{page}}</strong> de <strong>{{totalPages}}</strong></p>
+    {{#if hasNextPage}}
+        <a href={{nextLink}}><button>Sig</button></a>
+        {{else}}
+        <button disabled class="disabled">Sig</button>
+    {{/if}}
+</div>
+</main>
+<script  type="text/javascript"src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="/js/cart.js"></script>

@@ -1,15 +1,26 @@
 import { Router } from "express";
-import { getCartById, createCart, addProd_to_Cart, deleteProdinCart, updateProdinCart, deleteCart } from "../controllers/carts.js";
+import { CartController } from "../controllers/carts.js";
 import { auth } from "../middleware/auth.js";
+export const router = Router();
 
-const router = Router()
+router.get("/", CartController.getAllCarts);
 
+router.post("/", CartController.createCart);
 
-router.get("/:cid", getCartById)
-router.get("/" , createCart)
-router.post("/", createCart)
-router.post("/:cid/product/:pid", auth, addProd_to_Cart)
-router.delete("/:cid/product/:pid", deleteProdinCart)
-router.put("/:cid/product/:pid", updateProdinCart)
-router.delete("/:cid", deleteCart)
-export default router;
+router.get("/:cid", CartController.getCartById);
+
+router.post(
+  "/:cid/product/:pid",
+  auth(["user"]),
+  CartController.addProductToCart
+);
+
+router.delete("/:cid/product/:pid", CartController.deleteProductInCart);
+
+router.put("/:cid/product/:pid", CartController.updateProductInCart);
+
+router.delete("/:cid", CartController.deleteAllProductsInCart);
+
+router.put("/:cid", CartController.updateAllCart);
+
+router.post("/:cid/purchase", CartController.createTicket);
