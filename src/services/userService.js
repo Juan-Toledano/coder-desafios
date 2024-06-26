@@ -1,8 +1,8 @@
-import { userDAO } from "../DAO/factory.js";
+import { userDAO } from "../dao/factory.js";
 
 class UserService {
   constructor(dao) {
-    this.dao = dao; // Asigna directamente el DAO pasado como parámetro
+    this.dao = new dao();
   }
 
   async createUser(user) {

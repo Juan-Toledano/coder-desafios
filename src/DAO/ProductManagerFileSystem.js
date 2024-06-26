@@ -121,7 +121,7 @@ export class ProductManager {
   }
 
   async updateProducts(id, productData) {
-    
+    // ---> 'PRODUCTDATA' se pasa por el body de postman<---
     let productList = await this.getProducts();
     let findProduct = productList.find((p) => p.id === id);
     let i = productList.indexOf(findProduct);

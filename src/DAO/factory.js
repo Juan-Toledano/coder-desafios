@@ -1,48 +1,37 @@
 import { config } from "../config/config.js";
 import { Singleton } from "./singleton.js";
-import { CartManagerMongoDAO } from "./CartManagerMongoDao.js";
-
 
 export let productDAO;
-// export let cartDAO;
+export let cartDAO;
 export let userDAO;
 export let ticketDAO;
 
- export let cartDAO = new CartManagerMongoDAO()
-
 switch (config.PERSISTENCE.toUpperCase()) {
-  // case "FS":
-  //   const { ProductManagerFileSystem } = await import("./ProductManagerFileSystem.js");
-  //   productDAO = new ProductManagerFileSystem();
-  //   const { CartManagerFileSystem } = await import("./CartManagerFileSystem.js");
-  //   cartDAO = new CartManagerFileSystem();
-  //   break;
+  case "FS":
+    const productFsDAO = await import("./ProductManagerFileSystem.js");
+    productDAO = productFsDAO.ProductManager;
+    const cartFsDAO = await import("./CartManagerFileSystem.js");
+    cartDAO = cartFsDAO.CartManager;
+    break;
 
   case "MONGO":
-    await Singleton.connect(config.MONGO_URL, config.DB_NAME);
+    Singleton.connect(config.MONGO_URL, config.DB_NAME);
 
-    const { ProductManagerMongoDAO } = await import("./ProductoManagerMongoDao.js");
-    productDAO = new ProductManagerMongoDAO();
+    const productMongoDAO = await import("./ProductMongoDAO.js");
+    productDAO = productMongoDAO.ProductManagerMongoDAO;
 
-    // const { CartManagerMongoDAO } = await import("./CartManagerMongoDao.js");
-    // cartDAO = new CartManagerMongoDAO();
-    
+    const cartMongoDAO = await import("./CartMongoDAO.js");
+    cartDAO = cartMongoDAO.CartManagerMongoDAO;
 
-    const { UserManagerMongoDAO } = await import("./UserManagerMongoDAO.js");
-    userDAO = new UserManagerMongoDAO();
+    const userMongoDAO = await import("./UserMongoDAO.js");
+    userDAO = userMongoDAO.UserManagerMongoDAO;
 
-    const {ticketMongoDao} = await import ("./ticketsDao.js")
-    ticketDAO = new ticketMongoDao
+    const ticketMongoDAO = await import("./TicketMongoDAO.js");
+    ticketDAO = ticketMongoDAO.TicketMongoDAO;
 
     break;
 
   default:
     throw new Error("Misconfigured persistence");
+    break;
 }
-
-console.log({
-  productDAO,
-  cartDAO,
-  userDAO,
-  ticketDAO,
-});
