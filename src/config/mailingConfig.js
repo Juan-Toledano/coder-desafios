@@ -127,7 +127,6 @@ export const sendTicket = (
                 </div>
             </div>
             <div class="footer">
-                <p>2024 Victor Molina. Todos los derechos reservados.</p>
             </div>
         </div>
     </body>

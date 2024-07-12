@@ -1,9 +1,8 @@
 import { cartService } from "../services/CartService.js";
 import { isValidObjectId } from "mongoose";
 import { ticketService } from "../services/ticketService.js";
-import { ERROR_TYPES } from "../utils/Errors.js";
 import { CustomError } from "../utils/CustomError.js";
-
+import { ERROR_TYPES } from "../utils/Errors.js";
 
 export class CartController {
   static getAllCarts = async (req, res, next) => {
@@ -15,11 +14,38 @@ export class CartController {
         return CustomError.createError(
           "ERROR",
           null,
-          "CA not found",
+          "Carts not found",
           ERROR_TYPES.NOT_FOUND
         );
       }
     } catch (error) {
+      if (error.code !== 500) {
+        req.logger.error(
+          JSON.stringify(
+            {
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+              code: error.code,
+            },
+            null,
+            5
+          )
+        );
+      } else {
+        req.logger.fatal(
+          JSON.stringify(
+            {
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+              code: error.code,
+            },
+            null,
+            5
+          )
+        );
+      }
       next(error);
     }
   };
@@ -40,6 +66,33 @@ export class CartController {
         );
       }
     } catch (error) {
+      if (error.code !== 500) {
+        req.logger.error(
+          JSON.stringify(
+            {
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+              code: error.code,
+            },
+            null,
+            5
+          )
+        );
+      } else {
+        req.logger.fatal(
+          JSON.stringify(
+            {
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+              code: error.code,
+            },
+            null,
+            5
+          )
+        );
+      }
       next(error);
     }
   };
@@ -48,7 +101,7 @@ export class CartController {
     try {
       let { cid } = req.params;
       if (!isValidObjectId(cid)) {
-        return CustomError.createError(
+        CustomError.createError(
           "ERROR",
           null,
           "Enter a valid Mongo ID",
@@ -69,7 +122,6 @@ export class CartController {
           res.json({ cartById });
         }
       } catch (error) {
-        res;
         return CustomError.createError(
           "ERROR",
           null,
@@ -78,6 +130,33 @@ export class CartController {
         );
       }
     } catch (error) {
+      if (error.code !== 500) {
+        req.logger.error(
+          JSON.stringify(
+            {
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+              code: error.code,
+            },
+            null,
+            5
+          )
+        );
+      } else {
+        req.logger.fatal(
+          JSON.stringify(
+            {
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+              code: error.code,
+            },
+            null,
+            5
+          )
+        );
+      }
       next(error);
     }
   };
@@ -117,6 +196,33 @@ export class CartController {
         );
       }
     } catch (error) {
+      if (error.code !== 500) {
+        req.logger.error(
+          JSON.stringify(
+            {
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+              code: error.code,
+            },
+            null,
+            5
+          )
+        );
+      } else {
+        req.logger.fatal(
+          JSON.stringify(
+            {
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+              code: error.code,
+            },
+            null,
+            5
+          )
+        );
+      }
       next(error);
     }
   };
@@ -154,6 +260,33 @@ export class CartController {
         );
       }
     } catch (error) {
+      if (error.code !== 500) {
+        req.logger.error(
+          JSON.stringify(
+            {
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+              code: error.code,
+            },
+            null,
+            5
+          )
+        );
+      } else {
+        req.logger.fatal(
+          JSON.stringify(
+            {
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+              code: error.code,
+            },
+            null,
+            5
+          )
+        );
+      }
       next(error);
     }
   };
@@ -192,6 +325,33 @@ export class CartController {
         );
       }
     } catch (error) {
+      if (error.code !== 500) {
+        req.logger.error(
+          JSON.stringify(
+            {
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+              code: error.code,
+            },
+            null,
+            5
+          )
+        );
+      } else {
+        req.logger.fatal(
+          JSON.stringify(
+            {
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+              code: error.code,
+            },
+            null,
+            5
+          )
+        );
+      }
       next(error);
     }
   };
@@ -229,6 +389,33 @@ export class CartController {
         );
       }
     } catch (error) {
+      if (error.code !== 500) {
+        req.logger.error(
+          JSON.stringify(
+            {
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+              code: error.code,
+            },
+            null,
+            5
+          )
+        );
+      } else {
+        req.logger.fatal(
+          JSON.stringify(
+            {
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+              code: error.code,
+            },
+            null,
+            5
+          )
+        );
+      }
       next(error);
     }
   };
@@ -276,6 +463,17 @@ export class CartController {
         );
       }
     } catch (error) {
+      req.logger.error(
+        JSON.stringify(
+          {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+          },
+          null,
+          5
+        )
+      );
       next(error);
     }
   };
@@ -305,6 +503,33 @@ export class CartController {
         );
       }
     } catch (error) {
+      if (error.code !== 500) {
+        req.logger.error(
+          JSON.stringify(
+            {
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+              code: error.code,
+            },
+            null,
+            5
+          )
+        );
+      } else {
+        req.logger.fatal(
+          JSON.stringify(
+            {
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+              code: error.code,
+            },
+            null,
+            5
+          )
+        );
+      }
       next(error);
     }
   };
