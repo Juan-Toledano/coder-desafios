@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { CartController } from "../controller/cartController.js";
 import { auth } from "../middlewares/auth.js";
+import { CartController } from "../controller/CartController.js";
 export const router = Router();
 
 router.get("/", CartController.getAllCarts);
@@ -11,7 +11,7 @@ router.get("/:cid", CartController.getCartById);
 
 router.post(
   "/:cid/product/:pid",
-  auth(["user"]),
+  auth(["user", "premium"]),
   CartController.addProductToCart
 );
 

@@ -10,6 +10,9 @@ import { router as cartRouter } from "./routes/cartRouter.js";
 import { router as sessionsRouter } from "./routes/sessionsRouter.js";
 import { router as mockingRouter } from "./routes/mockingRouter.js";
 import { router as loggerRouter } from "./routes/loggerRouter.js";
+
+import { router as passwordRouter } from "./routes/passwordResetRouter.js";
+import { router as userRouter } from "./routes/userRouter.js";
 import sessions from "express-session";
 import { messagesModel } from "./dao/models/messagesModel.js";
 import MongoStore from "connect-mongo";
@@ -52,9 +55,11 @@ app.use(express.static(path.join(__dirname, "/public")));
 app.use("/api/products", productRouter);
 app.use("/api/carts", cartRouter);
 app.use("/api/sessions", sessionsRouter);
+app.use("/api/users", userRouter);
 app.use("/mockingproducts", mockingRouter);
 app.use("/loggerTest", loggerRouter);
 app.use("/", viewsRouter);
+app.use("/", passwordRouter);
 
 const server = app.listen(PORT, () =>
   logger.info(`Server listening in port:${PORT}`)
