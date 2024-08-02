@@ -1,7 +1,7 @@
 import { sendTicket } from "../utils/mailing.js";
 import { ticketDAO } from "../dao/factory.js";
-import { cartService } from "./CartService.js";
 import { productService } from "./ProductService.js";
+import { cartService } from "./cartService.js";
 
 export class TicketService {
   constructor(dao) {

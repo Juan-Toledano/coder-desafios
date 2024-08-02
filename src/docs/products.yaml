@@ -1,0 +1,67 @@
+paths:
+  /api/products:
+    get:
+      summary: Get all products
+      tags:
+        - Products
+      description: Retrieves a list of all available products with pagination and filtering options.
+      responses:
+        "200":
+          description: A list of products
+        "500":
+          description: Internal Server Error
+
+    post:
+      summary: Add a new product
+      tags:
+        - Products
+      description: Creates a new product. Ensure all required fields are provided.
+      responses:
+        "201":
+          description: Product added successfully
+        "400":
+          description: Invalid product data
+        "500":
+          description: Internal Server Error
+
+  /api/products/{pid}:
+    get:
+      summary: Get product by ID
+      tags:
+        - Products
+      description: Retrieves a specific product by its ID.
+      responses:
+        "200":
+          description: Product found
+        "400":
+          description: Invalid product ID
+        "404":
+          description: Product not found
+
+    put:
+      summary: Update a product
+      tags:
+        - Products
+      description: Updates an existing product. Only allowed fields can be updated.
+      responses:
+        "200":
+          description: Product updated successfully
+        "400":
+          description: Invalid product data
+        "404":
+          description: Product not found
+
+    delete:
+      summary: Delete a product
+      tags:
+        - Products
+      description: Deletes a specific product by its ID. Requires admin or product owner privileges.
+      responses:
+        "200":
+          description: Product deleted successfully
+        "400":
+          description: Invalid product ID
+        "403":
+          description: Unauthorized to delete product
+        "404":
+          description: Product not found
