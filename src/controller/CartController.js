@@ -1,10 +1,9 @@
 import { isValidObjectId } from "mongoose";
 import { CustomError } from "../utils/CustomError.js";
 import { cartService } from "../services/cartService.js";
-import { productService } from "../services/ProductService.js";
 import { ticketService } from "../services/ticketService.js";
 import { ERROR_TYPES } from "../utils/Errors.js";
-
+import { productService } from "../services/ProductService.js";
 
 export class CartController {
   static getAllCarts = async (req, res, next) => {
@@ -55,9 +54,10 @@ export class CartController {
   static createCart = async (req, res, next) => {
     try {
       try {
-        await cartService.createCart();
+        let cart = await cartService.createCart();
         return res.json({
-          payload: `Cart created!`,
+          payload: `Cart created`,
+          cart,
         });
       } catch (error) {
         return CustomError.createError(
@@ -184,16 +184,26 @@ export class CartController {
           ERROR_TYPES.INVALID_ARGUMENTS
         );
       }
+      let product = await productService.getProductsBy({ _id: pid });
+      if (!product) {
+        return CustomError.createError(
+          "ERROR",
+          null,
+          "Product not found",
+          ERROR_TYPES.NOT_FOUND
+        );
+      }
       const userRole = req.session.user.role.toLowerCase();
       const userEmail = req.session.user.email;
-      let product = await productService.getProductsBy({ _id: pid });
-      if (userRole == "premium" || product.owner == userEmail) {
-        return CustomError.createError(
-          "Premium User Restriction",
-          null,
-          "Premium users cannot add their own products to the cart",
-          ERROR_TYPES.UNAUTHORIZED
-        );
+      if (userRole.toLowerCase() == "premium") {
+        if (product.owner == userEmail) {
+          return CustomError.createError(
+            "Premium User Restriction",
+            null,
+            "Premium users cannot add their own products to the cart",
+            ERROR_TYPES.UNAUTHORIZED
+          );
+        }
       }
 
       try {
@@ -262,13 +272,36 @@ export class CartController {
       }
 
       try {
+        let cart = await cartService.getCartById(cid);
+        if (cart.products.length === 0) {
+          return CustomError.createError(
+            "ERROR",
+            null,
+            "No products in the cart",
+            ERROR_TYPES.NOT_FOUND
+          );
+        }
+        for (const product of cart.products) {
+          const productDetails = await productService.getProductsBy({
+            _id: pid,
+          });
+          if (!productDetails) {
+            return CustomError.createError(
+              "ERROR",
+              null,
+              "Product not found",
+              ERROR_TYPES.NOT_FOUND
+            );
+          }
+        }
+
         await cartService.deleteProductInCart(cid, pid);
         return res.json({ payload: `Product ${pid} deleted from cart ${cid}` });
       } catch (error) {
         return CustomError.createError(
           "Error",
           null,
-          "Internal server Error",
+          `Internal server Error, ${error.message}`,
           ERROR_TYPES.INTERNAL_SERVER_ERROR
         );
       }
@@ -327,13 +360,36 @@ export class CartController {
       }
 
       try {
+        let cart = await cartService.getCartById(cid);
+        if (cart.products.length === 0) {
+          return CustomError.createError(
+            "ERROR",
+            null,
+            "No products in the cart",
+            ERROR_TYPES.NOT_FOUND
+          );
+        }
+        for (const product of cart.products) {
+          const productDetails = await productService.getProductsBy({
+            _id: pid,
+          });
+          if (!productDetails) {
+            return CustomError.createError(
+              "ERROR",
+              null,
+              "Product not found",
+              ERROR_TYPES.NOT_FOUND
+            );
+          }
+        }
         await cartService.updateProductInCart(cid, pid, quantity);
-        res.json({ payload: `Product ${pid} updated` });
+        let cartUpdated = await cartService.getCartById(cid);
+        res.json({ payload: `Product ${pid} updated`, cartUpdated });
       } catch (error) {
         return CustomError.createError(
           "Error",
           null,
-          "Internal server Error",
+          `Internal server Error, ${error.message}`,
           ERROR_TYPES.INTERNAL_SERVER_ERROR
         );
       }
@@ -466,7 +522,8 @@ export class CartController {
 
       try {
         await cartService.updateAllCart(cid, toUpdate);
-        res.json({ payload: `Cart ${cid} updated` });
+        let cartUpdated = await cartService.getCartById(cid);
+        res.json({ payload: `Cart ${cid} updated`, cartUpdated });
       } catch (error) {
         return CustomError.createError(
           "Error",

@@ -1,7 +1,7 @@
 import { io } from "../app.js";
 import { isValidObjectId } from "mongoose";
-import { productService } from "../services/ProductService.js";
 import { CustomError } from "../utils/CustomError.js";
+import { productService } from "../services/ProductService.js";
 import { ERROR_TYPES } from "../utils/Errors.js";
 
 export class ProductController {
@@ -57,16 +57,16 @@ export class ProductController {
   };
 
   static getProductById = async (req, res, next) => {
-    let { pid } = req.params;
-    if (!isValidObjectId(pid)) {
-      return CustomError.createError(
-        "ERROR",
-        null,
-        "Enter a valid Mongo ID",
-        ERROR_TYPES.INVALID_ARGUMENTS
-      );
-    }
     try {
+      let { pid } = req.params;
+      if (!isValidObjectId(pid)) {
+        return CustomError.createError(
+          "ERROR",
+          null,
+          "Enter a valid Mongo ID",
+          ERROR_TYPES.INVALID_ARGUMENTS
+        );
+      }
       let product = await productService.getProductsBy({ _id: pid });
       if (product) {
         res.json({ product });
@@ -152,10 +152,15 @@ export class ProductController {
       }
 
       try {
-        await productService.addProduct({ ...req.body });
+        const owner = req.session.user.email;
+        await productService.addProduct({
+          ...req.body,
+          owner,
+        });
         let productList = await productService.getAllProducts();
         io.emit("updateProducts", productList);
-        return res.json({ payload: `Product added` });
+        let product = await productService.getProductsBy({ code });
+        return res.json({ payload: "Product added", product });
       } catch (error) {
         return CustomError.createError(
           "Error",
@@ -209,7 +214,6 @@ export class ProductController {
       }
 
       let toUpdate = req.body;
-
       if (toUpdate._id) {
         delete toUpdate._id;
       }
@@ -243,7 +247,7 @@ export class ProductController {
         return CustomError.createError(
           "ERROR",
           null,
-          "Error updating product ",
+          `Error updating product, ${error.message} `,
           ERROR_TYPES.INVALID_ARGUMENTS
         );
       }
@@ -290,27 +294,40 @@ export class ProductController {
           ERROR_TYPES.INVALID_ARGUMENTS
         );
       }
-      try {
-        let products = await productService.deleteProduct(pid);
-        if (products.deletedCount > 0) {
-          let productList = await productService.getProductsPaginate();
-          io.emit("deleteProducts", productList);
-          return res.json({ payload: `Product ${pid} deleted` });
-        } else {
+      const userRole = req.session.user.role;
+      const userEmail = req.session.user.email;
+      let product = await productService.getProductsBy({ _id: pid });
+
+      if (
+        userRole === "admin" ||
+        (userRole === "premium" && product.owner === userEmail)
+      ) {
+        try {
+          let products = await productService.deleteProduct(pid);
+          if (products.deletedCount > 0) {
+            let productList = await productService.getProductsPaginate();
+            io.emit("deleteProducts", productList);
+            return res.json({ payload: `Product ${pid} deleted` });
+          } else {
+            return CustomError.createError(
+              "ERROR",
+              null,
+              "Product not found",
+              ERROR_TYPES.NOT_FOUND
+            );
+          }
+        } catch (error) {
           return CustomError.createError(
             "ERROR",
             null,
-            "Product not found",
-            ERROR_TYPES.NOT_FOUND
+            `Error deleting product`,
+            ERROR_TYPES.INVALID_ARGUMENTS
           );
         }
-      } catch (error) {
-        return CustomError.createError(
-          "ERROR",
-          null,
-          `Error deleting product`,
-          ERROR_TYPES.INVALID_ARGUMENTS
-        );
+      } else {
+        return res
+          .status(403)
+          .json({ error: `Insufficient privileges to delete` });
       }
     } catch (error) {
       if (error.code !== 500) {
