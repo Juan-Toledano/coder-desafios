@@ -2,11 +2,11 @@ import { Router } from "express";
 export const router = Router();
 import { auth } from "../middlewares/auth.js";
 import { cartService } from "../services/cartService.js";
-import { productService } from "../services/ProductService.js";
-import { UserViewDTO } from "../dao/DTO/UserDTO.js";
+import { productService } from "../services/productService.js";
+import { UserViewDTO } from "../dao/dto/UserDTO.js";
 
-router.get("/", auth(["admin", "user", "premium"]), (req, res) => {
-  res.redirect("/products");
+router.get("/", (req, res) => {
+  res.status(200).render("index");
 });
 router.get(
   "/products",
@@ -81,5 +81,13 @@ router.get("/login", auth(["public"]), (req, res) => {
 router.get("/profile", auth(["admin", "user", "premium"]), (req, res) => {
   let user = new UserViewDTO(req.session.user);
   let cart = { _id: req.session.user.cart };
-  res.render("profile", { user, cart });
+  let userId = req.session.user._id;
+  res.render("profile", { user, cart, userId });
+});
+
+router.get("/documents/:uid", (req, res) => {
+  let userId = req.session.user._id;
+  let user = new UserViewDTO(req.session.user);
+  let cart = { _id: req.session.user.cart };
+  res.render("uploadDocuments", { userId, user, cart });
 });
