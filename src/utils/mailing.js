@@ -48,7 +48,6 @@ export const sendTicket = (
         </tbody>
       </table>
     `;
-
   const htmlContent = `
         <!DOCTYPE html>
         <html lang="es">
@@ -127,7 +126,7 @@ export const sendTicket = (
                     </div>
                 </div>
                 <div class="footer">
-                    <p>2024 Victor Molina. Todos los derechos reservados.</p>
+                    <p>2024 Juan Cruz Toledano. Todos los derechos reservados.</p>
                 </div>
             </div>
         </body>
@@ -136,7 +135,7 @@ export const sendTicket = (
 
   transporter
     .sendMail({
-      from: "Victor Molina <molinavitillo@gmail.com>",
+      from: "Juan Cruz Toledano <juancruztoledano@gmail.com>",
       to: to,
       subject: `Ticket #${ticketCode}`,
       html: htmlContent,
@@ -177,13 +176,14 @@ export const sendTicket = (
 };
 
 export const sendResetPassword = (token, user) => {
+  let URL = config.URL;
   const mailOptions = {
     to: user.email,
-    from: "Victor Molina <molinavitillo@gmail.com>",
+    from: "Juan Cruz Toledano <juancruztoledano@gmail.com>",
     subject: "Password Reset",
     text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.
       Please click on the following link, or paste this into your browser to complete the process:
-      http://localhost:8081/reset/${token}
+      http://${URL}/reset/${token}
       If you did not request this, please ignore this email and your password will remain unchanged.`,
   };
 
@@ -222,4 +222,110 @@ export const sendResetPassword = (token, user) => {
         );
       }
     });
+};
+
+export const sendAccountDeletionNotification = async (to, userName, logger) => {
+  try {
+    const mailOptions = {
+      from: "Juan Cruz Toledano <juancruztoledano@gmail.com>",
+      to: to,
+      subject: "Account Deletion Notification",
+      text: `Hello ${userName},\n\nYour account has been deleted due to inactivity.\n\nBest regards,\nJuan Cruz Toledano`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    logger.debug(
+      `Email sent successfully to ${to} notifying account deletion.`
+    );
+  } catch (error) {
+    if (error.code !== 500) {
+      logger.error(
+        JSON.stringify(
+          {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+            code: error.code,
+          },
+          null,
+          5
+        )
+      );
+    } else {
+      logger.fatal(
+        JSON.stringify(
+          {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+            code: error.code,
+          },
+          null,
+          5
+        )
+      );
+    }
+    throw CustomError.createError(
+      "Email Error",
+      null,
+      `Failed to send account deletion notification to ${to}`,
+      ERROR_TYPES.INTERNAL_ERROR
+    );
+  }
+};
+
+export const sendProductDeletionNotification = async (
+  to,
+  productName,
+  logger
+) => {
+  try {
+    const mailOptions = {
+      from: "Juan Cruz Toledano <juancruztoledano@gmail.com>",
+      to: to,
+      subject: "Product Deletion Notification",
+      text: `Hello,\n\nWe wanted to inform you that your product "${productName}" has been deleted.\n\nBest regards,\nJuan Cruz Toledano`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    logger.debug(
+      `Email sent successfully to ${to} notifying product deletion.`
+    );
+  } catch (error) {
+    if (error.code !== 500) {
+      logger.error(
+        JSON.stringify(
+          {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+            code: error.code,
+          },
+          null,
+          5
+        )
+      );
+    } else {
+      logger.fatal(
+        JSON.stringify(
+          {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+            code: error.code,
+          },
+          null,
+          5
+        )
+      );
+    }
+    throw CustomError.createError(
+      "Email Error",
+      null,
+      `Failed to send product deletion notification to ${to}`,
+      ERROR_TYPES.INTERNAL_ERROR
+    );
+  }
 };

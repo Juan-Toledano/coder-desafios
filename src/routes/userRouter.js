@@ -4,6 +4,8 @@ import { auth } from "../middlewares/auth.js";
 import { upload } from "../utils/index.js";
 export const router = Router();
 
+router.get("/", UserController.getAllUsers);
+
 router.get(
   "/premium/:uid",
   auth(["admin", "user", "premium"]),
@@ -20,3 +22,13 @@ router.post(
   ]),
   UserController.uploadDocuments
 );
+
+router.delete(
+  "/",
+  auth(["admin", "user", "premium"]),
+  UserController.deleteUsers
+);
+
+router.post("/admin/:uid/role", UserController.roleChangeAdmin);
+
+router.post("/admin/:uid/delete", UserController.deleteOneUser);

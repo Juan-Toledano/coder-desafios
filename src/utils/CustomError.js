@@ -1,4 +1,4 @@
-import { ERROR_TYPES } from "./Errors.js";
+import { ERROR_TYPES } from "./EErrors.js";
 
 export class CustomError {
   static createError(

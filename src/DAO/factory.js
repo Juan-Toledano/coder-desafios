@@ -1,5 +1,5 @@
 import { config } from "../config/config.js";
-import { Singleton } from "./singleton.js";
+import { Singleton } from "./SingletonDB.js";
 
 export let productDAO;
 export let cartDAO;
@@ -12,6 +12,10 @@ switch (config.PERSISTENCE.toUpperCase()) {
     productDAO = productFsDAO.ProductManager;
     const cartFsDAO = await import("./CartManagerFileSystem.js");
     cartDAO = cartFsDAO.CartManager;
+    const userFsDAO = await import("./UserManagerFS.js");
+    userDAO = userFsDAO.UserManager;
+    const ticketFsDAO = await import("./TicketManagerFS.js");
+    ticketDAO = ticketFsDAO.TicketManager;
     break;
 
   case "MONGO":

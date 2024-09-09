@@ -1,9 +1,9 @@
+import { cartService } from "../services/cartsService.js";
 import { isValidObjectId } from "mongoose";
+import { ticketService } from "../services/ticketsService.js";
 import { CustomError } from "../utils/CustomError.js";
-import { cartService } from "../services/cartService.js";
-import { ticketService } from "../services/ticketService.js";
-import { ERROR_TYPES } from "../utils/Errors.js";
-import { productService } from "../services/ProductService.js";
+import { ERROR_TYPES } from "../utils/EErrors.js";
+import { productService } from "../services/productsService.js";
 
 export class CartController {
   static getAllCarts = async (req, res, next) => {

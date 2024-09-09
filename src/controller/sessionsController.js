@@ -1,7 +1,7 @@
 import { UserViewDTO } from "../dao/dto/UserDTO.js";
 import { usersModel } from "../dao/models/userModel.js";
 import { CustomError } from "../utils/CustomError.js";
-import { ERROR_TYPES } from "../utils/Errors.js";
+import { ERROR_TYPES } from "../utils/EErrors.js";
 
 export class SessionsController {
   static login = async (req, res, next) => {
@@ -57,6 +57,14 @@ export class SessionsController {
 
       req.session.destroy((error) => {
         handleSessionDestroy(error);
+        if (error) {
+          CustomError.createError(
+            "Error",
+            error.message,
+            `Internal server Error, ${error.message}`,
+            ERROR_TYPES.INTERNAL_SERVER_ERROR
+          );
+        }
         if (web === "web") {
           return res.redirect("/");
         } else {
@@ -64,12 +72,6 @@ export class SessionsController {
         }
       });
     } catch (error) {
-      CustomError.createError(
-        "Error",
-        error.message,
-        `Internal server Error, ${error.message}`,
-        ERROR_TYPES.INTERNAL_SERVER_ERROR
-      );
       next(error);
     }
   };

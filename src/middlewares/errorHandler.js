@@ -1,6 +1,5 @@
-
+import { ERROR_TYPES } from "../utils/EErrors.js";
 import __dirname from "../dirname.js";
-import { ERROR_TYPES } from "../utils/Errors.js";
 
 export const errorHandler = (error, req, res, next) => {
   switch (error.code) {
@@ -14,6 +13,8 @@ export const errorHandler = (error, req, res, next) => {
       return res.status(404).json({ error: `${error.message}` });
 
     default:
-      return res.status(500).json({ error: `Error - contact administrator` });
+      return res
+        .status(500)
+        .json({ error: `Error - contact administrator, ${error.message}` });
   }
 };

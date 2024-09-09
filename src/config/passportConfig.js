@@ -4,8 +4,8 @@ import github from "passport-github2";
 import { createHash, validatePassword } from "../utils/index.js";
 import __dirname from "../dirname.js";
 import { config } from "./config.js";
-import { cartService } from "../services/cartService.js";
-import { userService } from "../services/userService.js";
+import { cartService } from "../services/cartsService.js";
+import { userService } from "../services/usersService.js";
 
 export const initPassport = () => {
   passport.use(

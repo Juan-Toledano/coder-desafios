@@ -1,13 +1,15 @@
 import { Router } from "express";
 export const router = Router();
 import { auth } from "../middlewares/auth.js";
-import { cartService } from "../services/cartService.js";
-import { productService } from "../services/productService.js";
+import { cartService } from "../services/cartsService.js";
+import { productService } from "../services/productsService.js";
+import { userService } from "../services/usersService.js";
 import { UserViewDTO } from "../dao/dto/UserDTO.js";
 
 router.get("/", (req, res) => {
   res.status(200).render("index");
 });
+
 router.get(
   "/products",
   auth(["admin", "user", "premium"]),
@@ -52,7 +54,7 @@ router.get(
   }
 );
 
-router.get("/chat", auth(["user"]), (req, res) => {
+router.get("/chat", auth(["user", "premium"]), (req, res) => {
   res.status(200).render("chat");
 });
 
@@ -78,11 +80,19 @@ router.get("/login", auth(["public"]), (req, res) => {
   res.render("login", { error });
 });
 
-router.get("/profile", auth(["admin", "user", "premium"]), (req, res) => {
+router.get("/profile", auth(["admin", "user", "premium"]), async (req, res) => {
   let user = new UserViewDTO(req.session.user);
   let cart = { _id: req.session.user.cart };
   let userId = req.session.user._id;
-  res.render("profile", { user, cart, userId });
+  let userRole = req.session.user.role;
+  let userList = await userService.getAll();
+  res.render("profile", {
+    user,
+    cart,
+    userId,
+    isAdmin: userRole == "admin",
+    userList,
+  });
 });
 
 router.get("/documents/:uid", (req, res) => {
